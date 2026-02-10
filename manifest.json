@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
-    "name": "Rewrite Assistant",
-    "version": "1.0.5",
-    "description": "Internal text rewriting tool",
+    "name": "NexText",
+    "version": "1.1.1",
+    "description": "Refine text, fix grammar, and ask questions instantly. Powered by OpenAI & Local Ollama models.",
 
     "permissions": [
         "storage",
