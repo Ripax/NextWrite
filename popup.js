@@ -1,5 +1,5 @@
 /* =========================================================
-    1. ELEMENTS & SETUP
+   1. ELEMENTS & SETUP
 ========================================================= */
 
 // --- Layout & Toggles ---
@@ -13,15 +13,21 @@ const themeToggle = document.getElementById("themeToggle");
 const apiStatusText = document.getElementById("apiStatusText");
 const statusLabel = apiStatusText.querySelector('.status-label');
 
+// --- Settings: Tabs & History ---
+const tabConfig = document.getElementById("tabConfig");
+const tabHistory = document.getElementById("tabHistory");
+const settingsConfig = document.getElementById("settingsConfig");
+const settingsHistory = document.getElementById("settingsHistory");
+const historyList = document.getElementById("historyList");
+const clearHistoryBtn = document.getElementById("clearHistoryBtn");
+
 // --- Main Interface ---
 const inputText = document.getElementById("inputText");
 const outputText = document.getElementById("outputText");
-const actionBtn = document.getElementById("actionBtn"); // Main Rewrite/Solve button
+const actionBtn = document.getElementById("actionBtn"); 
 const spinner = document.getElementById("spinner");
 const copyBtn = document.getElementById("copyBtn");
-
-// --- Mode Toggle (Sliding Switch) ---
-const appModeToggle = document.getElementById("appModeToggle"); // Checkbox for Rewrite/Solve
+const appModeToggle = document.getElementById("appModeToggle");
 
 // --- Settings: Providers ---
 const providerRadios = document.querySelectorAll('input[name="aiProvider"]');
@@ -40,11 +46,11 @@ const temperatureSlider = document.getElementById("temperatureSlider");
 const tempValue = document.getElementById("tempValue");
 
 /* =========================================================
-    2. STATE VARIABLES
+   2. STATE VARIABLES
 ========================================================= */
 
 let activeProvider = "openai";
-let currentMode = "rewrite"; // 'rewrite' or 'solve'
+let currentMode = "rewrite";
 let currentTemperature = 0.7;
 let ollamaWatcher = null;
 
@@ -52,12 +58,9 @@ const OLLAMA_ENDPOINT = "http://localhost:11434/api/generate";
 const OLLAMA_TAGS = "http://localhost:11434/api/tags";
 
 /* =========================================================
-    3. HELPER FUNCTIONS
+   3. HELPER FUNCTIONS
 ========================================================= */
 
-/**
- * Updates status bar state (color) and text
- */
 function updateStatus(state, text) {
     apiStatusText.classList.remove('error', 'loading');
     
@@ -66,7 +69,7 @@ function updateStatus(state, text) {
     
     if (statusLabel) {
         statusLabel.textContent = text;
-        statusLabel.title = text; // Tooltip for long text
+        statusLabel.title = text;
     }
 }
 
@@ -84,7 +87,7 @@ function applyTheme(theme) {
 }
 
 /* =========================================================
-    4. THEME LOGIC
+   4. THEME LOGIC
 ========================================================= */
 
 const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
@@ -105,7 +108,7 @@ themeToggle.onchange = () => {
 };
 
 /* =========================================================
-    5. SETTINGS PANELS
+   5. SETTINGS PANELS & TABS
 ========================================================= */
 
 settingsBtn.onclick = () => {
@@ -118,13 +121,27 @@ closeSettings.onclick = () => {
     animatePopupHeight();
 };
 
+tabConfig.onclick = () => {
+    tabConfig.classList.add("active");
+    tabHistory.classList.remove("active");
+    settingsConfig.classList.remove("hidden");
+    settingsHistory.classList.add("hidden");
+};
+
+tabHistory.onclick = () => {
+    tabHistory.classList.add("active");
+    tabConfig.classList.remove("active");
+    settingsHistory.classList.remove("hidden");
+    settingsConfig.classList.add("hidden");
+    renderHistory();
+};
+
 saveApiKeyBtn.onclick = () => {
     const key = openaiApiKeyInput.value.trim();
     if (key) {
         chrome.storage.local.set({ OPENAI_API_KEY: key }, () => {
             const originalText = saveApiKeyBtn.textContent;
             saveApiKeyBtn.textContent = "Saved!";
-            // Re-check status immediately if OpenAI is active
             if (activeProvider === 'openai') checkOpenAIConfig();
             setTimeout(() => saveApiKeyBtn.textContent = originalText, 1500);
         });
@@ -135,12 +152,71 @@ saveApiKeyBtn.onclick = () => {
 };
 
 /* =========================================================
-    6. MODE SWITCHING (Sliding Toggle Logic)
+   6. HISTORY MANAGEMENT
+========================================================= */
+
+function saveToHistory(prompt, response, mode) {
+    chrome.storage.local.get(["HISTORY"], (res) => {
+        let history = res.HISTORY || [];
+        const newItem = {
+            id: Date.now(),
+            date: new Date().toLocaleDateString(),
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            mode: mode,
+            prompt: prompt,
+            response: response
+        };
+        history.unshift(newItem);
+        if (history.length > 20) history.pop();
+        chrome.storage.local.set({ HISTORY: history });
+    });
+}
+
+function renderHistory() {
+    chrome.storage.local.get(["HISTORY"], (res) => {
+        const history = res.HISTORY || [];
+        historyList.innerHTML = "";
+
+        if (history.length === 0) {
+            historyList.innerHTML = '<div class="empty-history">No history yet</div>';
+            return;
+        }
+
+        history.forEach(item => {
+            const el = document.createElement("div");
+            el.className = "history-item";
+            el.innerHTML = `
+                <div class="history-meta">
+                    <span>${item.mode}</span>
+                    <span>${item.date} ${item.time}</span>
+                </div>
+                <div class="history-prompt">"${item.prompt}"</div>
+                <div class="history-response">${item.response}</div>
+            `;
+            el.onclick = () => {
+                inputText.value = item.prompt;
+                outputText.value = item.response;
+                settingsPanel.classList.add("hidden");
+                copyBtn.classList.remove("hidden");
+            };
+            historyList.appendChild(el);
+        });
+    });
+}
+
+clearHistoryBtn.onclick = () => {
+    chrome.storage.local.remove("HISTORY", () => {
+        renderHistory();
+        updateStatus('ready', 'History Cleared');
+    });
+};
+
+/* =========================================================
+   7. MODE SWITCHING
 ========================================================= */
 
 if (appModeToggle) {
     appModeToggle.addEventListener('change', () => {
-        // If checked -> Solve Mode. If unchecked -> Rewrite Mode.
         currentMode = appModeToggle.checked ? 'solve' : 'rewrite';
         updateModeUI();
     });
@@ -157,25 +233,20 @@ function updateModeUI() {
 }
 
 /* =========================================================
-    7. PROVIDER LOGIC & STATUS
+   8. PROVIDER LOGIC
 ========================================================= */
 
 function updateProviderUI() {
-    // Toggle Visibility
     openaiSettings.classList.toggle("hidden", activeProvider !== "openai");
     chatgptModelSettings.classList.toggle("hidden", activeProvider !== "openai");
     ollamaSettings.classList.toggle("hidden", activeProvider !== "local");
 
     if (activeProvider === "local") {
-        // --- LOCAL OLLAMA ---
         if (ollamaWatcher) clearInterval(ollamaWatcher);
-        
         updateStatus('loading', 'Connecting...');
         connectOllama();
-        // Poll every 10s to keep status "real"
         ollamaWatcher = setInterval(connectOllama, 10000);
     } else {
-        // --- OPENAI ---
         if (ollamaWatcher) {
             clearInterval(ollamaWatcher);
             ollamaWatcher = null;
@@ -186,7 +257,6 @@ function updateProviderUI() {
     animatePopupHeight();
 }
 
-// Helper: Verifies OpenAI Key exists and updates status
 function checkOpenAIConfig() {
     chrome.storage.local.get(["OPENAI_API_KEY", "SELECTED_MODEL"], (res) => {
         if (!res.OPENAI_API_KEY) {
@@ -198,7 +268,6 @@ function checkOpenAIConfig() {
     });
 }
 
-// Listener for Provider Radio Buttons
 providerRadios.forEach(radio => {
     radio.onchange = () => {
         activeProvider = radio.value;
@@ -207,18 +276,16 @@ providerRadios.forEach(radio => {
     };
 });
 
-// Listener for OpenAI Model Dropdown
 if (modelSwitcher) {
     modelSwitcher.addEventListener('change', () => {
         const selected = modelSwitcher.value;
         chrome.storage.local.set({ SELECTED_MODEL: selected });
-        // Update status immediately if active
         if (activeProvider === "openai") checkOpenAIConfig();
     });
 }
 
 /* =========================================================
-    8. OLLAMA LOGIC
+   9. OLLAMA LOGIC
 ========================================================= */
 
 async function connectOllama() {
@@ -230,10 +297,8 @@ async function connectOllama() {
         const models = data.models || [];
         
         if (models.length > 0) {
-            // Save current selection to restore
             const currentSelection = ollamaModelSelect.value;
             ollamaModelSelect.innerHTML = "";
-            
             const { OLLAMA_MODEL } = await chrome.storage.local.get("OLLAMA_MODEL");
             let modelFound = false;
 
@@ -242,7 +307,6 @@ async function connectOllama() {
                 const opt = document.createElement("option");
                 opt.value = name;
                 opt.textContent = name;
-                
                 if (name === OLLAMA_MODEL) {
                     opt.selected = true;
                     modelFound = true;
@@ -250,12 +314,10 @@ async function connectOllama() {
                 ollamaModelSelect.appendChild(opt);
             });
 
-            // Default to first model if preference not found
             if (!modelFound && models.length > 0) {
                 ollamaModelSelect.value = models[0].name;
                 chrome.storage.local.set({ OLLAMA_MODEL: models[0].name });
             }
-            // Green Status
             updateStatus('ready', ollamaModelSelect.value);
         } else {
             updateStatus('loading', 'No Models Found');
@@ -263,7 +325,6 @@ async function connectOllama() {
         animatePopupHeight();
 
     } catch (error) {
-        // Red Status
         updateStatus('error', 'Ollama Offline');
     }
 }
@@ -274,7 +335,7 @@ ollamaModelSelect.onchange = () => {
 };
 
 /* =========================================================
-    9. MAIN ACTION (REWRITE / SOLVE)
+   10. MAIN ACTION
 ========================================================= */
 
 actionBtn.onclick = async () => {
@@ -283,33 +344,30 @@ actionBtn.onclick = async () => {
     if (!userText) {
         updateStatus('error', "Enter text first");
         setTimeout(() => {
-            // Restore correct status
             if (activeProvider === 'openai') checkOpenAIConfig();
             else updateStatus('ready', ollamaModelSelect.value);
         }, 2000);
         return;
     }
 
-    // UI Loading State
     spinner.classList.remove("hidden");
     actionBtn.disabled = true;
     outputText.value = "";
     copyBtn.classList.add("hidden");
     
-    // Status Bar Message
     updateStatus('loading', currentMode === 'rewrite' ? "Rewriting..." : "Thinking...");
 
-    // Construct Prompt based on Mode
     let prompt;
     if (currentMode === 'rewrite') {
         prompt = `Rewrite this professionally, improving grammar and flow:\n\n${userText}`;
     } else {
-        prompt = userText; // Solve mode sends raw input
+        prompt = userText;
     }
 
     try {
+        let resultText = "";
+
         if (activeProvider === "local") {
-            // --- OLLAMA REQUEST ---
             const res = await fetch(OLLAMA_ENDPOINT, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -323,21 +381,24 @@ actionBtn.onclick = async () => {
             
             if(!res.ok) throw new Error("Ollama connection failed");
             const data = await res.json();
-            outputText.value = data.response || "No response";
+            resultText = data.response || "No response";
 
         } else {
-            // --- OPENAI REQUEST (via Background) ---
             const response = await chrome.runtime.sendMessage({
-                action: "rewrite", // Keeping action as 'rewrite' (or update bg script to handle generic 'generate')
+                action: "rewrite",
                 prompt: prompt,
                 model: modelSwitcher.value
             });
-            
             if (chrome.runtime.lastError) throw new Error(chrome.runtime.lastError.message);
-            outputText.value = response?.result || "No response";
+            resultText = response?.result || "No response";
         }
         
-        // Success: Restore Status
+        outputText.value = resultText;
+
+        if (resultText && resultText !== "No response") {
+            saveToHistory(userText, resultText, currentMode);
+        }
+        
         if (activeProvider === 'openai') checkOpenAIConfig();
         else updateStatus('ready', ollamaModelSelect.value);
 
@@ -346,7 +407,6 @@ actionBtn.onclick = async () => {
         updateStatus('error', "Failed");
     }
 
-    // Cleanup UI
     spinner.classList.add("hidden");
     actionBtn.disabled = false;
     copyBtn.classList.remove("hidden");
@@ -354,7 +414,7 @@ actionBtn.onclick = async () => {
 };
 
 /* =========================================================
-    10. UTILS (Copy & Temp)
+   11. UTILS
 ========================================================= */
 
 copyBtn.onclick = () => {
@@ -373,31 +433,26 @@ if (temperatureSlider && tempValue) {
 }
 
 /* =========================================================
-    11. INITIALIZATION
+   12. INIT
 ========================================================= */
 
 chrome.storage.local.get(
     ["AI_PROVIDER", "OPENAI_API_KEY", "SELECTED_MODEL", "OLLAMA_TEMP", "THEME"],
     (res) => {
-        // 1. Theme
         const savedTheme = res.THEME;
         if (savedTheme) applyTheme(savedTheme);
 
-        // 2. Settings Inputs
         openaiApiKeyInput.value = res.OPENAI_API_KEY || "";
         if (modelSwitcher) modelSwitcher.value = res.SELECTED_MODEL || "gpt-4o-mini";
 
-        // 3. Temperature
         currentTemperature = res.OLLAMA_TEMP ?? 0.7;
         if (temperatureSlider) temperatureSlider.value = currentTemperature;
         if (tempValue) tempValue.textContent = `Temperature: ${currentTemperature}`;
 
-        // 4. Provider Selection
         activeProvider = res.AI_PROVIDER || "openai";
         providerRadios.forEach(r => (r.checked = r.value === activeProvider));
 
-        // 5. Start!
         updateProviderUI(); 
-        updateModeUI(); // Sets button text correctly on load
+        updateModeUI();
     }
 );

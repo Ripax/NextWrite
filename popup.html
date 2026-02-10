@@ -9,6 +9,7 @@
 
 <body>
     <div class="popup-container">
+
         <div class="header">
             <div class="brand">
                 <img src="icons/ai.png" width="64" height="64" alt="AI Icon" style="border-radius: 8px;">
@@ -18,6 +19,7 @@
                 </div>
             </div>
         </div>
+
         <div class="control-bar">
             <button id="settingsBtn" class="icon-btn" title="Settings">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
@@ -41,55 +43,68 @@
         </div>
 
         <div id="settingsPanel" class="settings-panel hidden">
-            <div class="setting-group">
-                <div class="provider-toggle">
-                    <label class="provider-option">
-                        <input type="radio" name="aiProvider" value="local" />
-                        <span>🖥️ <small>Local</small></span>
-                    </label>
-                    <label class="provider-option">
-                        <input type="radio" name="aiProvider" value="openai" checked />
-                        <span>🤖 <small>ChatGPT</small></span>
-                    </label>
+
+            <div class="settings-tabs">
+                <button id="tabConfig" class="tab-btn active">Config</button>
+                <button id="tabHistory" class="tab-btn">History</button>
+            </div>
+
+            <div id="settingsConfig">
+                <div class="setting-group">
+                    <div class="provider-toggle">
+                        <label class="provider-option">
+                            <input type="radio" name="aiProvider" value="local" />
+                            <span>🖥️ <small>Local</small></span>
+                        </label>
+                        <label class="provider-option">
+                            <input type="radio" name="aiProvider" value="openai" checked />
+                            <span>🤖 <small>ChatGPT</small></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div id="openaiSettings" class="setting-group">
+                    <label>OpenAI API Key</label>
+                    <div class="api-key-row" style="display:flex; gap:6px;">
+                        <input type="password" id="openaiApiKey" placeholder="sk-..." />
+                        <button id="saveApiKey" style="width:auto; margin-top:6px;">Save</button>
+                    </div>
+                </div>
+
+                <div id="chatgptModelSettings" class="setting-group">
+                    <label>ChatGPT Model</label>
+                    <select id="modelSwitcher">
+                        <option value="gpt-4o-mini">GPT-4o Mini</option>
+                        <option value="gpt-4o">GPT-4o</option>
+                        <option value="gpt-4">GPT-4</option>
+                    </select>
+                </div>
+
+                <div id="ollamaSettings" class="setting-group hidden">
+                    <label>Ollama Model</label>
+                    <select id="ollamaModel"></select>
+
+                    <label style="margin-top:10px; display:block;">Temperature</label>
+                    <input type="range" id="temperatureSlider" min="0" max="1.5" step="0.1" value="0.7" />
+                    <div id="tempValue" style="font-size:11px; color:#888; text-align:right;">0.7</div>
                 </div>
             </div>
 
-            <div id="openaiSettings" class="setting-group">
-                <label>OpenAI API Key</label>
-                <div class="api-key-row" style="display:flex; gap:6px;">
-                    <input type="password" id="openaiApiKey" placeholder="sk-..." />
-                    <button id="saveApiKey" style="width:auto; margin-top:6px;">Save</button>
+            <div id="settingsHistory" class="hidden">
+                <div id="historyList" class="history-list">
+                    <div class="empty-history">No history yet</div>
                 </div>
+                <button id="clearHistoryBtn" class="secondary" style="margin-top:12px;">Clear History</button>
             </div>
 
-            <div id="chatgptModelSettings" class="setting-group">
-                <label>ChatGPT Model</label>
-                <select id="modelSwitcher">
-                    <option value="gpt-4o-mini">GPT-4o Mini</option>
-                    <option value="gpt-4o">GPT-4o</option>
-                    <option value="gpt-4">GPT-4</option>
-                </select>
-            </div>
-
-            <div id="ollamaSettings" class="setting-group hidden">
-                <label>Ollama Model</label>
-                <select id="ollamaModel"></select>
-
-                <label style="margin-top:10px; display:block;">Temperature</label>
-                <input type="range" id="temperatureSlider" min="0" max="1.5" step="0.1" value="0.7" />
-                <div id="tempValue" style="font-size:11px; color:#888; text-align:right;">0.7</div>
-            </div>
-
-            <button id="closeSettings" class="secondary">Close Settings</button>
+            <button id="closeSettings" class="secondary" style="margin-top:12px;">Close</button>
         </div>
 
         <div class="mode-switch-container">
             <label class="mode-switch">
                 <input type="checkbox" id="appModeToggle">
-
                 <span class="mode-label">✍️ Rewrite</span>
                 <span class="mode-label">💡 Solve</span>
-
                 <div class="glider"></div>
             </label>
         </div>
