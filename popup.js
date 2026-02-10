@@ -1,99 +1,99 @@
-/* =========================
-   ELEMENTS
-========================= */
+/* =========================================================
+   1. ELEMENTS & SETUP
+========================================================= */
 
+// --- Layout & Toggles ---
 const settingsBtn = document.getElementById("settingsBtn");
 const settingsPanel = document.getElementById("settingsPanel");
 const closeSettings = document.getElementById("closeSettings");
-
-const providerRadios = document.querySelectorAll('input[name="aiProvider"]');
-const openaiSettings = document.getElementById("openaiSettings");
-const ollamaSettings = document.getElementById("ollamaSettings");
-const chatgptModelSettings = document.getElementById("chatgptModelSettings");
-
-const ollamaModelSelect = document.getElementById("ollamaModel");
-
-const apiStatusText = document.getElementById("apiStatusText");
+const popupContainer = document.querySelector(".popup-container");
 const themeToggle = document.getElementById("themeToggle");
 
+// --- Status Bar ---
+const apiStatusText = document.getElementById("apiStatusText");
+// Defines the label span to update text
+const statusLabel = apiStatusText.querySelector('.status-label'); 
+
+// --- Inputs & Outputs ---
 const inputText = document.getElementById("inputText");
 const outputText = document.getElementById("outputText");
 const rewriteBtn = document.getElementById("rewriteBtn");
 const spinner = document.getElementById("spinner");
 const copyBtn = document.getElementById("copyBtn");
 
-const popupContainer = document.querySelector(".popup-container");
+// --- Settings: Providers ---
+const providerRadios = document.querySelectorAll('input[name="aiProvider"]');
+const openaiSettings = document.getElementById("openaiSettings");
+const ollamaSettings = document.getElementById("ollamaSettings");
 
-/* TEMPLATE UI */
-const dropdown = document.getElementById("templateDropdown");
-const dropdownTrigger = document.getElementById("dropdownTrigger");
-const dropdownMenu = document.getElementById("dropdownMenu");
-const selectedTemplateLabel = document.getElementById("selectedTemplate");
-const templateHint = document.getElementById("templateHint");
+// --- Settings: OpenAI ---
+const openaiApiKeyInput = document.getElementById("openaiApiKey");
+const saveApiKeyBtn = document.getElementById("saveApiKey");
+const chatgptModelSettings = document.getElementById("chatgptModelSettings");
+// CORRECTED: Matches your HTML ID "modelSwitcher"
+const modelSwitcher = document.getElementById("modelSwitcher"); 
 
-/* =========================
-   STATE
-========================= */
+// --- Settings: Ollama ---
+const ollamaModelSelect = document.getElementById("ollamaModel");
+const temperatureSlider = document.getElementById("temperatureSlider");
+const tempValue = document.getElementById("tempValue");
+
+/* =========================================================
+   2. STATE VARIABLES
+========================================================= */
 
 let activeProvider = "openai";
-let selectedTemplate = null;
+let currentTemperature = 0.7;
 let ollamaWatcher = null;
 
-/* =========================
-   CONSTANTS
-========================= */
-
+const OLLAMA_ENDPOINT = "http://localhost:11434/api/generate";
 const OLLAMA_TAGS = "http://localhost:11434/api/tags";
 
-/* =========================
-   HELPERS
-========================= */
+/* =========================================================
+   3. HELPER FUNCTIONS
+========================================================= */
 
-function updateMainStatus(text, isError = false) {
-    apiStatusText.textContent = text;
-    apiStatusText.style.color = isError ? "#ff6b6b" : "";
+function updateStatus(state, text) {
+    // Reset classes
+    apiStatusText.classList.remove('error', 'loading');
+    
+    // Apply state class
+    if (state === 'error') apiStatusText.classList.add('error');
+    if (state === 'loading') apiStatusText.classList.add('loading');
+    
+    // Update text content safely
+    if (statusLabel) {
+        statusLabel.textContent = text;
+    }
 }
 
-/* 🔼 Auto resize textarea */
-function autoResizeTextarea(el) {
-    el.style.height = "auto";
-    el.style.height = el.scrollHeight + "px";
-    animatePopupHeight();
-}
-
-/* 🪄 Smooth popup height animation */
 function animatePopupHeight() {
     requestAnimationFrame(() => {
         popupContainer.style.height = "auto";
-        const height = popupContainer.scrollHeight;
-        popupContainer.style.height = height + "px";
+        popupContainer.style.height = popupContainer.scrollHeight + "px";
     });
 }
 
-function buildFinalPrompt() {
-    if (selectedTemplate) return TEMPLATES[selectedTemplate];
-    return `Rewrite this professionally:\n\n${inputText.value}`;
-}
-
-function updateInputVisibility() {
-    const usingTemplate = selectedTemplate !== null;
-    rewriteBtn.textContent = usingTemplate ? "Generate" : "Rewrite";
-    inputText.disabled = usingTemplate;
-    inputText.style.opacity = usingTemplate ? "0.5" : "1";
-    inputText.placeholder = usingTemplate
-        ? "Template-based generation"
-        : "Paste text here";
-    templateHint?.classList.toggle("hidden", !usingTemplate);
-}
-
-/* =========================
-   THEME
-========================= */
-
 function applyTheme(theme) {
-    document.body.classList.toggle("dark", theme === "dark");
-    themeToggle.checked = theme === "dark";
+    const isDark = theme === "dark";
+    document.body.classList.toggle("light", !isDark);
+    themeToggle.checked = isDark;
 }
+
+/* =========================================================
+   4. THEME LOGIC
+========================================================= */
+
+const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+
+chrome.storage.local.get(["THEME"], (result) => {
+    const savedTheme = result.THEME;
+    if (savedTheme) {
+        applyTheme(savedTheme);
+    } else {
+        applyTheme(prefersDark ? "dark" : "light");
+    }
+});
 
 themeToggle.onchange = () => {
     const theme = themeToggle.checked ? "dark" : "light";
@@ -101,46 +101,9 @@ themeToggle.onchange = () => {
     applyTheme(theme);
 };
 
-/* =========================
-   TEMPLATE DROPDOWN
-========================= */
-
-dropdownTrigger.onclick = e => {
-    e.stopPropagation();
-    dropdown.classList.toggle("open");
-};
-
-document.addEventListener("click", () =>
-    dropdown.classList.remove("open")
-);
-
-function buildTemplateDropdown() {
-    dropdownMenu.innerHTML = "";
-    Object.entries(TEMPLATE_CONFIG).forEach(([group, items]) => {
-        const header = document.createElement("div");
-        header.className = "dropdown-group";
-        header.textContent = group;
-        dropdownMenu.appendChild(header);
-
-        items.forEach(({ key, label }) => {
-            const item = document.createElement("div");
-            item.className = "dropdown-item";
-            item.textContent = label;
-            item.onclick = () => {
-                selectedTemplate = key;
-                selectedTemplateLabel.textContent = label;
-                dropdown.classList.remove("open");
-                updateInputVisibility();
-                animatePopupHeight();
-            };
-            dropdownMenu.appendChild(item);
-        });
-    });
-}
-
-/* =========================
-   SETTINGS
-========================= */
+/* =========================================================
+   5. SETTINGS PANELS
+========================================================= */
 
 settingsBtn.onclick = () => {
     settingsPanel.classList.toggle("hidden");
@@ -152,9 +115,20 @@ closeSettings.onclick = () => {
     animatePopupHeight();
 };
 
-/* =========================
-   PROVIDER SWITCH
-========================= */
+saveApiKeyBtn.onclick = () => {
+    const key = openaiApiKeyInput.value.trim();
+    if (key) {
+        chrome.storage.local.set({ OPENAI_API_KEY: key }, () => {
+            const originalText = saveApiKeyBtn.textContent;
+            saveApiKeyBtn.textContent = "Saved!";
+            setTimeout(() => saveApiKeyBtn.textContent = originalText, 1500);
+        });
+    }
+};
+
+/* =========================================================
+   6. PROVIDER SWITCHING
+========================================================= */
 
 function updateProviderUI() {
     openaiSettings.classList.toggle("hidden", activeProvider !== "openai");
@@ -162,13 +136,24 @@ function updateProviderUI() {
     ollamaSettings.classList.toggle("hidden", activeProvider !== "local");
 
     if (activeProvider === "local") {
-        connectOllama();
+        // --- LOCAL ---
         if (!ollamaWatcher) {
+            connectOllama(); 
             ollamaWatcher = setInterval(connectOllama, 10000);
+        } else {
+            const currentModel = ollamaModelSelect.value || "Loading Ollama...";
+            updateStatus('ready', currentModel);
         }
     } else {
-        clearInterval(ollamaWatcher);
-        ollamaWatcher = null;
+        // --- OPENAI ---
+        if (ollamaWatcher) {
+            clearInterval(ollamaWatcher);
+            ollamaWatcher = null;
+        }
+        
+        // Grab value from correct selector "modelSwitcher"
+        const currentModel = modelSwitcher ? modelSwitcher.value : "gpt-4o-mini";
+        updateStatus('ready', currentModel);
     }
 
     animatePopupHeight();
@@ -182,107 +167,177 @@ providerRadios.forEach(radio => {
     };
 });
 
-/* =========================
-   OLLAMA (REMEMBER MODEL)
-========================= */
+/* =========================================================
+   7. OPENAI MODEL SELECTION
+========================================================= */
+
+if (modelSwitcher) {
+    modelSwitcher.addEventListener('change', () => {
+        const selected = modelSwitcher.value;
+        chrome.storage.local.set({ SELECTED_MODEL: selected });
+        
+        if (activeProvider === "openai") {
+            updateStatus('ready', selected);
+        }
+    });
+}
+
+/* =========================================================
+   8. OLLAMA LOGIC
+========================================================= */
 
 async function connectOllama() {
     try {
         const res = await fetch(OLLAMA_TAGS);
-        if (!res.ok) throw new Error();
+        if (!res.ok) throw new Error("Failed");
 
         const data = await res.json();
         const models = data.models || [];
+        
+        const currentSelection = ollamaModelSelect.value;
         ollamaModelSelect.innerHTML = "";
-
+        
         const { OLLAMA_MODEL } = await chrome.storage.local.get("OLLAMA_MODEL");
+        let modelFound = false;
 
         models.forEach(m => {
             const name = m.name || m.model;
             const opt = document.createElement("option");
             opt.value = name;
             opt.textContent = name;
-            if (name === OLLAMA_MODEL) opt.selected = true;
+            
+            if (name === OLLAMA_MODEL) {
+                opt.selected = true;
+                modelFound = true;
+            }
             ollamaModelSelect.appendChild(opt);
         });
 
-        updateMainStatus(`Local • ${ollamaModelSelect.value}`);
+        if (!modelFound && models.length > 0) {
+            ollamaModelSelect.value = models[0].name;
+            chrome.storage.local.set({ OLLAMA_MODEL: models[0].name });
+        }
+
+        updateStatus('ready', ollamaModelSelect.value || "Ollama Ready");
         animatePopupHeight();
-    } catch {
-        updateMainStatus("Local • Ollama offline ❌", true);
-        ollamaSettings.classList.add("hidden");
+
+    } catch (error) {
+        updateStatus('error', "Ollama Offline");
     }
 }
 
 ollamaModelSelect.onchange = () => {
-    chrome.storage.local.set({
-        OLLAMA_MODEL: ollamaModelSelect.value
-    });
+    chrome.storage.local.set({ OLLAMA_MODEL: ollamaModelSelect.value });
+    updateStatus('ready', ollamaModelSelect.value);
 };
 
-/* =========================
-   REWRITE
-========================= */
+/* =========================================================
+   9. REWRITE ACTION
+========================================================= */
 
-rewriteBtn.onclick = () => {
+rewriteBtn.onclick = async () => {
+    const userText = inputText.value.trim();
+
+    if (!userText) {
+        updateStatus('error', "Enter text first");
+        setTimeout(() => {
+            const currentModel = activeProvider === "openai" ? modelSwitcher.value : ollamaModelSelect.value;
+            updateStatus('ready', currentModel);
+        }, 2000);
+        return;
+    }
+
     spinner.classList.remove("hidden");
     rewriteBtn.disabled = true;
     outputText.value = "";
-    autoResizeTextarea(outputText);
+    copyBtn.classList.add("hidden");
+    
+    updateStatus('loading', "Generating...");
 
-    if (activeProvider === "local") {
-        chrome.runtime.sendMessage(
-            {
-                action: "ollama-generate",
-                model: ollamaModelSelect.value,
-                prompt: buildFinalPrompt()
-            },
-            res => {
-                spinner.classList.add("hidden");
-                rewriteBtn.disabled = false;
-                outputText.value = res?.ok ? res.output : res?.error;
-                autoResizeTextarea(outputText);
-                copyBtn.classList.remove("hidden");
-            }
-        );
+    const prompt = `Rewrite this professionally:\n\n${userText}`;
+
+    try {
+        if (activeProvider === "local") {
+            const res = await fetch(OLLAMA_ENDPOINT, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    model: ollamaModelSelect.value,
+                    prompt,
+                    stream: false,
+                    options: { temperature: currentTemperature }
+                })
+            });
+
+            const data = await res.json();
+            outputText.value = data.response || "No response";
+        } else {
+            const response = await chrome.runtime.sendMessage({
+                action: "rewrite",
+                prompt,
+                model: modelSwitcher.value
+            });
+            
+            if (chrome.runtime.lastError) throw new Error(chrome.runtime.lastError.message);
+            outputText.value = response?.result || "No response";
+        }
+        
+        const currentModel = activeProvider === "openai" ? modelSwitcher.value : ollamaModelSelect.value;
+        updateStatus('ready', currentModel);
+
+    } catch (err) {
+        outputText.value = "Error: " + err.message;
+        updateStatus('error', "Failed");
     }
+
+    spinner.classList.add("hidden");
+    rewriteBtn.disabled = false;
+    copyBtn.classList.remove("hidden");
+    animatePopupHeight();
 };
 
-/* =========================
-   OUTPUT AUTO RESIZE
-========================= */
-
-outputText.addEventListener("input", () =>
-    autoResizeTextarea(outputText)
-);
-
-/* =========================
-   COPY
-========================= */
+/* =========================================================
+   10. UTILS
+========================================================= */
 
 copyBtn.onclick = () => {
     navigator.clipboard.writeText(outputText.value);
+    const originalText = copyBtn.textContent;
     copyBtn.textContent = "Copied ✓";
-    setTimeout(() => (copyBtn.textContent = "Copy"), 1200);
+    setTimeout(() => (copyBtn.textContent = originalText), 1200);
 };
 
-/* =========================
-   INIT
-========================= */
+if (temperatureSlider && tempValue) {
+    temperatureSlider.addEventListener("input", () => {
+        currentTemperature = Number(temperatureSlider.value);
+        tempValue.textContent = `Temperature: ${currentTemperature.toFixed(1)}`;
+        chrome.storage.local.set({ OLLAMA_TEMP: currentTemperature });
+    });
+}
+
+/* =========================================================
+   11. INIT
+========================================================= */
 
 chrome.storage.local.get(
-    ["AI_PROVIDER", "THEME"],
-    res => {
-        activeProvider = res.AI_PROVIDER || "openai";
-        providerRadios.forEach(
-            r => (r.checked = r.value === activeProvider)
-        );
+    ["AI_PROVIDER", "OPENAI_API_KEY", "SELECTED_MODEL", "OLLAMA_TEMP", "THEME"],
+    (res) => {
+        const savedTheme = res.THEME;
+        if (savedTheme) applyTheme(savedTheme);
 
-        applyTheme(res.THEME || "dark");
-        buildTemplateDropdown();
-        selectedTemplateLabel.textContent = "None";
-        updateInputVisibility();
-        updateProviderUI();
-        animatePopupHeight();
+        openaiApiKeyInput.value = res.OPENAI_API_KEY || "";
+        
+        if (modelSwitcher) {
+            modelSwitcher.value = res.SELECTED_MODEL || "gpt-4o-mini";
+        }
+
+        currentTemperature = res.OLLAMA_TEMP ?? 0.7;
+        if (temperatureSlider) temperatureSlider.value = currentTemperature;
+        if (tempValue) tempValue.textContent = `Temperature: ${currentTemperature}`;
+
+        activeProvider = res.AI_PROVIDER || "openai";
+        providerRadios.forEach(r => (r.checked = r.value === activeProvider));
+
+        updateProviderUI(); 
     }
 );

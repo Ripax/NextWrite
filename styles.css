@@ -1,200 +1,109 @@
 /* =========================================================
-    THEME VARIABLES
+   1. THEME VARIABLES
 ========================================================= */
 
 :root {
+    /* Core Colors */
     --bg: #0f1115;
-    --card: #0f1115;
+    --card: #16191f;
     --text: #e6e6e6;
     --muted: #9aa4b2;
-    --input-bg: #1c1f26;
     --border: #2a2f3a;
+
+    /* Interactive Colors */
+    --input-bg: #1c1f26;
     --primary: #5eb94c;
+    --primary-hover: #4da03e;
+    --danger: #ef4444;
+    --warning: #eab308;
+
+    /* Spacing & Radius */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+
+    /* Animation */
+    --ease: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 body.light {
-    --bg: #f5f7fb;
+    --bg: #f3f4f6;
     --card: #ffffff;
     --text: #1f2937;
     --muted: #6b7280;
-    --input-bg: #f1f5f9;
-    --border: #d1d5db;
-    --primary: #5eb94c;
+    --input-bg: #f9fafb;
+    --border: #e5e7eb;
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
 /* =========================================================
-    POPUP SIZE (CHROME-SAFE)
+   2. RESET & BASE
 ========================================================= */
 
-.icon-btn {
-    width: 12px;
-    height: 12px;
-
-    padding: 0;
-    /* 🚫 remove padding */
-    margin: 0;
-
-    background: transparent;
-    border: none;
-    cursor: pointer;
-
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    font-size: 12px;
-    /* icon size */
-    line-height: 12px;
-    /* 👈 CRITICAL */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
 }
-
-.icon-btn:hover {
-    opacity: 0.8;
-}
-
-.icon-btn:hover {
-    filter: drop-shadow(0 0 4px rgba(94, 185, 76, 0.5));
-}
-
-/* =========================================================
-    POPUP SIZE (CHROME-SAFE)
-========================================================= */
 
 html,
 body {
     margin: 0;
     padding: 0;
-
     width: 330px;
     min-height: 480px;
-    max-height: auto;
-
-    background: var(--bg);
     overflow: hidden;
-    /* 🚫 no outer scrollbar */
+    /* Prevent body scroll */
 }
 
 body {
+    background: var(--bg);
+    color: var(--text);
     display: flex;
     flex-direction: column;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont;
-    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 13px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
 }
 
 /* =========================================================
-    SMOOTH POPUP HEIGHT ANIMATION
+   3. LAYOUT & CONTAINERS
 ========================================================= */
 
 .popup-container {
     background: var(--card);
-    color: var(--text);
-
-    padding: 14px;
-    border-radius: 14px 14px 0 0;
-
-    box-shadow:
-        0 12px 28px rgba(0, 0, 0, 0.55),
-        0 6px 12px rgba(0, 0, 0, 0.4);
-
-    overflow: hidden;
-
-    /* 🪄 magic */
-    transition: height 0.25s cubic-bezier(.4, 0, .2, 1);
-}
-
-/* =========================================================
-    ACRYLIC THIN SCROLLBAR (NO CONFLICTS)
-========================================================= */
-
-textarea::-webkit-scrollbar,
-.dropdown-menu::-webkit-scrollbar,
-.settings-panel::-webkit-scrollbar {
-    width: 6px;
-}
-
-textarea::-webkit-scrollbar-track,
-.dropdown-menu::-webkit-scrollbar-track,
-.settings-panel::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-textarea::-webkit-scrollbar-thumb,
-.dropdown-menu::-webkit-scrollbar-thumb,
-.settings-panel::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.25);
-    border-radius: 10px;
-    backdrop-filter: blur(6px);
-}
-
-textarea::-webkit-scrollbar-thumb:hover,
-.dropdown-menu::-webkit-scrollbar-thumb:hover,
-.settings-panel::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.45);
-}
-
-/* Firefox */
-textarea,
-.dropdown-menu,
-.settings-panel {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.35) transparent;
-}
-
-/* =========================================================
-    INPUTS & TEXTAREAS
-========================================================= */
-
-input,
-textarea {
-    width: 100%;
-    margin-top: 6px;
-    padding: 8px;
-
-    background: var(--input-bg);
-    color: var(--text);
-
+    padding: 16px;
+    margin: 8px;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
     border: 1px solid var(--border);
-    border-radius: 8px;
-    box-sizing: border-box;
+    overflow: hidden;
+    transition: background 0.3s var(--ease), border-color 0.3s var(--ease);
 }
-
-/* Auto-grow output */
-textarea {
-    resize: none;
-    overflow-y: hidden;
-    min-height: 80px;
-
-    transition: height 0.18s ease, opacity 0.15s ease;
-    transform-origin: top;
-}
-
-textarea.scrollable {
-    overflow-y: auto;
-}
-
-/* =========================================================
-    HEADER
-========================================================= */
 
 .header {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 12px;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
 }
 
-.header img {
-    border-radius: 12px;
-}
-
-.title {
+.brand {
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    gap: 10px;
 }
 
 .app-name {
-    font-size: 16px;
-    font-weight: 600;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
 }
 
 .app-subtitle {
@@ -203,33 +112,114 @@ textarea.scrollable {
 }
 
 /* =========================================================
-    API STATUS + THEME TOGGLE
+   4. CONTROL BAR (Status + Settings + Theme)
 ========================================================= */
 
-.api-status {
+.control-bar {
     display: flex;
     align-items: center;
     justify-content: space-between;
-
-    margin: 6px;
-    padding: 5px;
-
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 8px;
+    gap: 12px;
+    margin-bottom: 12px;
+    padding: 8px 12px;
+    background: var(--input-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03);
 }
 
+/* Settings Button */
+.icon-btn {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    margin: 0;
+    flex-shrink: 0;
+    /* Prevent shrinking */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    box-shadow: none;
+}
+
+.icon-btn:hover {
+    background: rgba(155, 155, 155, 0.1);
+    color: var(--text);
+    border-color: var(--border);
+}
+
+.icon-btn:active {
+    transform: scale(0.95);
+}
+
+/* Status Text Area */
 .status-text {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    /* Increased slightly to give the dot breathing room */
     font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+
+    /* REMOVED: overflow: hidden; (This was cutting off the glow) */
+    /* REMOVED: white-space: nowrap; */
+}
+
+/* The Label Span (Apply truncation here instead if text gets too long) */
+.status-label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 120px;
+    /* Limits width so it doesn't push buttons off screen */
+}
+
+/* Status Dot & Animation */
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    /* Ensures dot never gets squished */
+    background-color: var(--primary);
+
+    /* Margin ensures the shadow doesn't hit the neighbor element */
+    margin-left: 4px;
+
+    box-shadow: 0 0 0 2px rgba(94, 185, 76, 0.2);
+    animation: pulse-green 2s infinite;
+}
+
+/* Status States */
+.status-text.error .status-dot {
+    background-color: var(--danger);
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+    animation: none;
+}
+
+.status-text.loading .status-dot {
+    background-color: var(--warning);
+    box-shadow: 0 0 0 2px rgba(234, 179, 8, 0.2);
+    animation: pulse-yellow 2s infinite;
 }
 
 /* =========================================================
-    TOGGLE SWITCH
+   5. THEME TOGGLE SWITCH
 ========================================================= */
 
 .switch {
     position: relative;
-    width: 36px;
-    height: 18px;
+    width: 44px;
+    height: 24px;
+    display: inline-block;
+    flex-shrink: 0;
+    /* Prevent shrinking */
 }
 
 .switch input {
@@ -242,59 +232,99 @@ textarea.scrollable {
     position: absolute;
     inset: 0;
     cursor: pointer;
-    background: #2e3440;
-    border-radius: 999px;
-    transition: background-color 0.25s ease;
+    background-color: #374151;
+    border-radius: 34px;
+    border: 1px solid var(--border);
+    transition: background-color 0.3s var(--ease);
+
+    /* Sun & Moon Icons */
+    background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23fbbf24'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z' /%3E%3C/svg%3E"),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239aa4b2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z' /%3E%3C/svg%3E");
+    background-position: 4px center, 24px center;
+    background-repeat: no-repeat;
+    background-size: 14px 14px;
 }
 
 .slider::before {
     content: "";
     position: absolute;
-    width: 12px;
-    height: 12px;
-    left: 3px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: #ffffff;
+    height: 18px;
+    width: 18px;
+    left: 2px;
+    bottom: 2px;
+    background-color: #a8a8a8;
     border-radius: 50%;
-    transition: transform 0.25s ease;
+    transition: transform 0.3s var(--ease);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    z-index: 2;
 }
 
 input:checked+.slider {
-    background: var(--primary);
+    background-color: #a8a8a8;
 }
 
 input:checked+.slider::before {
-    transform: translate(18px, -50%);
+    transform: translateX(20px);
+    background-color: #a8a8a8;
 }
 
-/* =========================
-    AI PROVIDER TOGGLE (RESTORED + POLISHED)
-========================= */
+input:focus-visible+.slider {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
 
+/* =========================================================
+   6. FORMS & INPUTS
+========================================================= */
+
+input[type="text"],
+input[type="password"],
+textarea,
+select {
+    width: 100%;
+    margin-top: 6px;
+    padding: 10px 12px;
+    background: var(--input-bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    appearance: none;
+    /* Normalize native select styling */
+}
+
+textarea {
+    resize: none;
+    min-height: 110px;
+    line-height: 1.6;
+}
+
+/* Focus States */
+input:focus,
+textarea:focus,
+select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(94, 185, 76, 0.15);
+}
+
+/* Provider Toggle (Radio Group) */
 .provider-toggle {
     display: flex;
     gap: 8px;
-    margin-top: 6px;
+    margin: 12px 0;
+    padding: 4px;
+    background: var(--input-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
 }
 
 .provider-option {
     flex: 1;
     position: relative;
-
-    padding: 10px 8px;
-
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-
     cursor: pointer;
-    text-align: center;
-
-    transition:
-        background 0.18s ease,
-        border-color 0.18s ease,
-        transform 0.08s ease;
 }
 
 .provider-option input {
@@ -305,255 +335,146 @@ input:checked+.slider::before {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     gap: 4px;
-
+    padding: 8px;
+    border-radius: var(--radius-sm);
     font-size: 12px;
-    color: var(--text);
-    opacity: 0.75;
-
-    transition: opacity 0.18s ease;
-}
-
-/* hover */
-.provider-option:hover {
-    background: rgba(94, 185, 76, 0.12);
-    border-color: rgba(94, 185, 76, 0.4);
-}
-
-/* active */
-.provider-option input:checked+span {
-    opacity: 1;
-    font-weight: 600;
-}
-
-.provider-option input:checked {
-    display: none;
-}
-
-.provider-option input:checked+span::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-
-    border-radius: 10px;
-    border: 1px solid var(--primary);
-
-    pointer-events: none;
-}
-
-/* press */
-.provider-option:active {
-    transform: translateY(1px);
-}
-
-.provider-option input:checked+span {
-    text-shadow: 0 0 6px rgba(94, 185, 76, 0.35);
-}
-
-/* =========================================================
-    CUSTOM DROPDOWN
-========================================================= */
-
-.dropdown {
-    position: relative;
-    margin-top: 6px;
-}
-
-.dropdown-trigger {
-    height: 36px;
-    padding: 0 10px;
-
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    background: var(--input-bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-
-    cursor: pointer;
-}
-
-.dropdown-menu {
-    position: absolute;
-    top: calc(100% + 6px);
-    left: 0;
-    right: 0;
-
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-
-    padding: 6px 0;
-
-    opacity: 0;
-    transform: translateY(-6px) scale(0.98);
-    pointer-events: none;
-
-    transition: opacity 0.18s ease, transform 0.18s ease;
-}
-
-.dropdown.open .dropdown-menu {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-    pointer-events: auto;
-}
-
-/* =========================
-   SMOOTH MODEL SELECTOR
-========================= */
-
-.settings-panel select,
-#ollamaModel {
-    width: 100%;
-    height: 34px;
-    padding: 0 34px 0 10px;
-
-    background:
-        linear-gradient(to bottom,
-            rgba(255, 255, 255, 0.06),
-            rgba(255, 255, 255, 0.02)),
-        var(--input-bg);
-
-    color: var(--text);
-
-    border: 1px solid var(--border);
-    border-radius: 10px;
-
-    font-size: 12px;
+    color: var(--muted);
     font-weight: 500;
-
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-
-    cursor: pointer;
-
-    transition:
-        border-color 0.18s ease,
-        box-shadow 0.18s ease,
-        background 0.18s ease,
-        transform 0.08s ease;
+    transition: all 0.2s var(--ease);
 }
 
-/* hover */
-.settings-panel select:hover,
-#ollamaModel:hover {
-    border-color: rgba(94, 185, 76, 0.6);
+.provider-option:hover span {
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text);
 }
 
-/* focus */
-.settings-panel select:focus,
-#ollamaModel:focus {
-    outline: none;
-
-    border-color: var(--primary);
-    box-shadow:
-        0 0 0 1px rgba(94, 185, 76, 0.6),
-        0 6px 16px rgba(0, 0, 0, 0.35);
-}
-
-/* press */
-.settings-panel select:active,
-#ollamaModel:active {
-    transform: translateY(1px);
-}
-
-/* =========================
-    CUSTOM DROPDOWN ARROW
-========================= */
-
-.settings-panel select,
-#ollamaModel {
-    background-image:
-        linear-gradient(45deg,
-            transparent 50%,
-            rgba(255, 255, 255, 0.6) 50%),
-        linear-gradient(135deg,
-            rgba(255, 255, 255, 0.6) 50%,
-            transparent 50%),
-        linear-gradient(to right,
-            transparent,
-            transparent);
-    background-position:
-        calc(100% - 18px) 14px,
-        calc(100% - 13px) 14px,
-        100% 0;
-    background-size:
-        5px 5px,
-        5px 5px,
-        2.5em 100%;
-    background-repeat: no-repeat;
-}
-
-.settings-panel select:focus,
-#ollamaModel:focus {
-    background:
-        linear-gradient(to bottom,
-            rgba(94, 185, 76, 0.18),
-            rgba(94, 185, 76, 0.06)),
-        var(--input-bg);
+.provider-option input:checked+span {
+    background: var(--card);
+    color: var(--primary);
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), inset 0 0 0 1px var(--border);
 }
 
 /* =========================================================
-    SETTINGS PANEL (ANIMATED)
-========================================================= */
-
-.settings-panel {
-    margin: 12px;
-    padding: 12px;
-
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 10px;
-
-    transform-origin: top;
-    transform: translateY(-6px) scaleY(0.98);
-    opacity: 0;
-    pointer-events: none;
-
-    transition:
-        transform 0.18s ease,
-        opacity 0.18s ease;
-}
-
-.settings-panel:not(.hidden) {
-    transform: translateY(0) scaleY(1);
-    opacity: 1;
-    pointer-events: auto;
-}
-
-/* =========================================================
-    BUTTONS
+   7. BUTTONS
 ========================================================= */
 
 button {
     width: 100%;
-    margin-top: 10px;
-    padding: 8px;
-
+    margin-top: 16px;
+    padding: 10px 16px;
     background: var(--primary);
-    color: #fff;
-
+    color: #ffffff;
     border: none;
-    border-radius: 8px;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 13px;
     cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+button:hover {
+    background-color: var(--primary-hover);
+}
+
+button:active {
+    transform: scale(0.98);
+}
+
+button:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
 }
 
 button.secondary {
-    background: #2e3440;
+    background: #374151;
+    color: #e5e7eb;
+}
+
+button.secondary:hover {
+    background: #4b5563;
 }
 
 /* =========================================================
-    UTIL
+   8. SETTINGS & SCROLLBARS
 ========================================================= */
+
+.settings-panel {
+    margin-top: 12px;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    transform-origin: top;
+    transition: all 0.25s var(--ease);
+}
 
 .hidden {
     display: none !important;
 }
 
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
+/* Modern Slim Scrollbars */
+textarea,
+.settings-panel {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(155, 155, 155, 0.3) transparent;
+}
+
+::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(155, 155, 155, 0.3);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(155, 155, 155, 0.5);
+}
+
+/* =========================================================
+   9. KEYFRAME ANIMATIONS
+========================================================= */
+
+@keyframes pulse-green {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(94, 185, 76, 0.7);
+    }
+
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 6px rgba(94, 185, 76, 0);
+    }
+
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(94, 185, 76, 0);
+    }
+}
+
+@keyframes pulse-yellow {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(234, 179, 8, 0.7);
+    }
+
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 6px rgba(234, 179, 8, 0);
+    }
+
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(234, 179, 8, 0);
     }
 }
