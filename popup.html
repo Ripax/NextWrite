@@ -84,17 +84,14 @@
         </div>
 
         <textarea id="inputText" placeholder="Paste text here to rewrite..."></textarea>
+        <button id="rewriteBtn">Rewrite</button>
 
-        <button id="rewriteBtn">Rewrite Text</button>
-
-        <div id="spinner" class="spinner hidden"></div>
-
-        <textarea id="outputText" readonly placeholder="Result will appear here..."></textarea>
-
+        <div class="output-container">
+            <div id="spinner" class="spinner hidden"></div>
+            <textarea id="outputText" readonly placeholder="Result will appear here..."></textarea>
+        </div>
         <button id="copyBtn" class="secondary hidden">Copy Result</button>
-
     </div>
     <script src="popup.js"></script>
 </body>
-
 </html>

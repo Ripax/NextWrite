@@ -2,38 +2,30 @@
    1. ELEMENTS & SETUP
 ========================================================= */
 
-// --- Layout & Toggles ---
 const settingsBtn = document.getElementById("settingsBtn");
 const settingsPanel = document.getElementById("settingsPanel");
 const closeSettings = document.getElementById("closeSettings");
 const popupContainer = document.querySelector(".popup-container");
 const themeToggle = document.getElementById("themeToggle");
 
-// --- Status Bar ---
 const apiStatusText = document.getElementById("apiStatusText");
-// Defines the label span to update text
 const statusLabel = apiStatusText.querySelector('.status-label'); 
 
-// --- Inputs & Outputs ---
 const inputText = document.getElementById("inputText");
 const outputText = document.getElementById("outputText");
 const rewriteBtn = document.getElementById("rewriteBtn");
 const spinner = document.getElementById("spinner");
 const copyBtn = document.getElementById("copyBtn");
 
-// --- Settings: Providers ---
 const providerRadios = document.querySelectorAll('input[name="aiProvider"]');
 const openaiSettings = document.getElementById("openaiSettings");
 const ollamaSettings = document.getElementById("ollamaSettings");
 
-// --- Settings: OpenAI ---
 const openaiApiKeyInput = document.getElementById("openaiApiKey");
 const saveApiKeyBtn = document.getElementById("saveApiKey");
 const chatgptModelSettings = document.getElementById("chatgptModelSettings");
-// CORRECTED: Matches your HTML ID "modelSwitcher"
 const modelSwitcher = document.getElementById("modelSwitcher"); 
 
-// --- Settings: Ollama ---
 const ollamaModelSelect = document.getElementById("ollamaModel");
 const temperatureSlider = document.getElementById("temperatureSlider");
 const tempValue = document.getElementById("tempValue");
@@ -64,6 +56,7 @@ function updateStatus(state, text) {
     // Update text content safely
     if (statusLabel) {
         statusLabel.textContent = text;
+        statusLabel.title = text; // Tooltip for long text
     }
 }
 
@@ -121,29 +114,40 @@ saveApiKeyBtn.onclick = () => {
         chrome.storage.local.set({ OPENAI_API_KEY: key }, () => {
             const originalText = saveApiKeyBtn.textContent;
             saveApiKeyBtn.textContent = "Saved!";
+            // Re-check status after saving
+            if(activeProvider === 'openai') checkOpenAIConfig();
             setTimeout(() => saveApiKeyBtn.textContent = originalText, 1500);
         });
+    } else {
+        // If user clears the key
+        chrome.storage.local.remove("OPENAI_API_KEY");
+        if(activeProvider === 'openai') updateStatus('error', 'Missing API Key');
     }
 };
 
 /* =========================================================
-   6. PROVIDER SWITCHING
+   6. PROVIDER SWITCHING & REAL-TIME CHECKS
 ========================================================= */
 
 function updateProviderUI() {
+    // 1. Toggle UI
     openaiSettings.classList.toggle("hidden", activeProvider !== "openai");
     chatgptModelSettings.classList.toggle("hidden", activeProvider !== "openai");
     ollamaSettings.classList.toggle("hidden", activeProvider !== "local");
 
+    // 2. Logic & Status Updates
     if (activeProvider === "local") {
         // --- LOCAL ---
-        if (!ollamaWatcher) {
-            connectOllama(); 
-            ollamaWatcher = setInterval(connectOllama, 10000);
-        } else {
-            const currentModel = ollamaModelSelect.value || "Loading Ollama...";
-            updateStatus('ready', currentModel);
-        }
+        if (ollamaWatcher) clearInterval(ollamaWatcher);
+        
+        // Show "Connecting..." Yellow immediately
+        updateStatus('loading', 'Connecting...');
+        
+        // Check immediately
+        connectOllama();
+        // Poll every 10 seconds
+        ollamaWatcher = setInterval(connectOllama, 10000);
+
     } else {
         // --- OPENAI ---
         if (ollamaWatcher) {
@@ -151,12 +155,24 @@ function updateProviderUI() {
             ollamaWatcher = null;
         }
         
-        // Grab value from correct selector "modelSwitcher"
-        const currentModel = modelSwitcher ? modelSwitcher.value : "gpt-4o-mini";
-        updateStatus('ready', currentModel);
+        // Show "Verifying..." Yellow immediately
+        updateStatus('loading', 'Verifying Key...');
+        checkOpenAIConfig();
     }
 
     animatePopupHeight();
+}
+
+// New Function: Check if OpenAI Key exists
+function checkOpenAIConfig() {
+    chrome.storage.local.get(["OPENAI_API_KEY", "SELECTED_MODEL"], (res) => {
+        if (!res.OPENAI_API_KEY) {
+            updateStatus('error', 'Missing API Key');
+        } else {
+            const model = modelSwitcher ? modelSwitcher.value : "gpt-4o-mini";
+            updateStatus('ready', model);
+        }
+    });
 }
 
 providerRadios.forEach(radio => {
@@ -177,52 +193,67 @@ if (modelSwitcher) {
         chrome.storage.local.set({ SELECTED_MODEL: selected });
         
         if (activeProvider === "openai") {
-            updateStatus('ready', selected);
+            // Re-verify key when model changes just to be safe
+            checkOpenAIConfig();
         }
     });
 }
 
 /* =========================================================
-   8. OLLAMA LOGIC
+   8. OLLAMA LOGIC (Real Connection Check)
 ========================================================= */
 
 async function connectOllama() {
     try {
         const res = await fetch(OLLAMA_TAGS);
-        if (!res.ok) throw new Error("Failed");
+        
+        // If network request failed (404/500), throw error
+        if (!res.ok) throw new Error("Ollama Error");
 
         const data = await res.json();
         const models = data.models || [];
         
-        const currentSelection = ollamaModelSelect.value;
-        ollamaModelSelect.innerHTML = "";
-        
-        const { OLLAMA_MODEL } = await chrome.storage.local.get("OLLAMA_MODEL");
-        let modelFound = false;
-
-        models.forEach(m => {
-            const name = m.name || m.model;
-            const opt = document.createElement("option");
-            opt.value = name;
-            opt.textContent = name;
+        // --- SUCCESS: Update UI to Green ---
+        // (Only rebuild dropdown if we actually have models)
+        if (models.length > 0) {
+             // Save current selection to restore it after rebuilding options
+            const currentSelection = ollamaModelSelect.value;
+            ollamaModelSelect.innerHTML = "";
             
-            if (name === OLLAMA_MODEL) {
-                opt.selected = true;
-                modelFound = true;
+            const { OLLAMA_MODEL } = await chrome.storage.local.get("OLLAMA_MODEL");
+            let modelFound = false;
+
+            models.forEach(m => {
+                const name = m.name || m.model;
+                const opt = document.createElement("option");
+                opt.value = name;
+                opt.textContent = name;
+                
+                if (name === OLLAMA_MODEL) {
+                    opt.selected = true;
+                    modelFound = true;
+                }
+                ollamaModelSelect.appendChild(opt);
+            });
+
+            if (!modelFound && models.length > 0) {
+                ollamaModelSelect.value = models[0].name;
+                chrome.storage.local.set({ OLLAMA_MODEL: models[0].name });
             }
-            ollamaModelSelect.appendChild(opt);
-        });
-
-        if (!modelFound && models.length > 0) {
-            ollamaModelSelect.value = models[0].name;
-            chrome.storage.local.set({ OLLAMA_MODEL: models[0].name });
+            
+            // GREEN STATUS
+            updateStatus('ready', ollamaModelSelect.value);
+        } else {
+            // Connected but no models installed
+            updateStatus('loading', 'No Models Found');
         }
-
-        updateStatus('ready', ollamaModelSelect.value || "Ollama Ready");
+        
         animatePopupHeight();
 
     } catch (error) {
-        updateStatus('error', "Ollama Offline");
+        // --- FAIL: Update UI to Red ---
+        updateStatus('error', 'Ollama Offline');
+        // Hide settings if we can't connect? Optional.
     }
 }
 
@@ -241,8 +272,9 @@ rewriteBtn.onclick = async () => {
     if (!userText) {
         updateStatus('error', "Enter text first");
         setTimeout(() => {
-            const currentModel = activeProvider === "openai" ? modelSwitcher.value : ollamaModelSelect.value;
-            updateStatus('ready', currentModel);
+            // Restore correct status based on provider
+            if (activeProvider === 'openai') checkOpenAIConfig();
+            else connectOllama();
         }, 2000);
         return;
     }
@@ -252,6 +284,7 @@ rewriteBtn.onclick = async () => {
     outputText.value = "";
     copyBtn.classList.add("hidden");
     
+    // Set status to Yellow "Generating..."
     updateStatus('loading', "Generating...");
 
     const prompt = `Rewrite this professionally:\n\n${userText}`;
@@ -268,6 +301,8 @@ rewriteBtn.onclick = async () => {
                     options: { temperature: currentTemperature }
                 })
             });
+            
+            if(!res.ok) throw new Error("Ollama connection failed");
 
             const data = await res.json();
             outputText.value = data.response || "No response";
@@ -282,12 +317,13 @@ rewriteBtn.onclick = async () => {
             outputText.value = response?.result || "No response";
         }
         
-        const currentModel = activeProvider === "openai" ? modelSwitcher.value : ollamaModelSelect.value;
-        updateStatus('ready', currentModel);
+        // Success: Restore Green Status
+        if (activeProvider === 'openai') checkOpenAIConfig();
+        else updateStatus('ready', ollamaModelSelect.value);
 
     } catch (err) {
         outputText.value = "Error: " + err.message;
-        updateStatus('error', "Failed");
+        updateStatus('error', "Generation Failed");
     }
 
     spinner.classList.add("hidden");
@@ -338,6 +374,7 @@ chrome.storage.local.get(
         activeProvider = res.AI_PROVIDER || "openai";
         providerRadios.forEach(r => (r.checked = r.value === activeProvider));
 
+        // Trigger initial check
         updateProviderUI(); 
     }
 );

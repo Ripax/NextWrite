@@ -442,6 +442,59 @@ textarea,
 }
 
 /* =========================================================
+   LAZY VELOCITY SPINNER
+========================================================= */
+
+/* Wrapper to center it over the output */
+.output-container {
+    position: relative;
+    margin-top: 12px;
+    min-height: 40px;
+}
+
+.spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    /* Center exactly */
+    transform: translate(-50%, -50%);
+    z-index: 10;
+
+    width: 32px;
+    height: 32px;
+
+    /* The Ring Track (Faint Background) */
+    border: 3px solid rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+
+    /* The Moving Part (Solid Color) */
+    border-top-color: var(--primary);
+
+    /* VELOCITY ANIMATION: Custom cubic-bezier creates the "whip" effect */
+    animation: lazy-spin 1.2s cubic-bezier(0.6, 0.05, 0.2, 0.9) infinite;
+}
+
+/* Light Theme Adjustment */
+body.light .spinner {
+    border-color: rgba(0, 0, 0, 0.05);
+    border-top-color: var(--primary);
+}
+
+/* =========================================================
+   ANIMATION KEYFRAMES
+========================================================= */
+
+@keyframes lazy-spin {
+    0% {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+
+    100% {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+/* =========================================================
    9. KEYFRAME ANIMATIONS
 ========================================================= */
 
