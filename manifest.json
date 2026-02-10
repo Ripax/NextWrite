@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
-    "name": "Rewrite Assistant",
-    "version": "1.0.5",
-    "description": "Internal text rewriting tool",
+    "name": "NexText",
+    "version": "1.1.1",
+    "description": "Refine text, fix grammar, and ask questions instantly. Powered by OpenAI & Local Ollama models.",
 
     "permissions": [
         "storage",
@@ -19,7 +19,6 @@
         "extension_pages": "script-src 'self'; object-src 'self'; connect-src https://api.openai.com http://localhost:11434 http://127.0.0.1:11434"
     },
 
-    /* 🧠 Application Icon (used by Chrome internally & Web Store) */
     "icons": {
         "16": "icons/icon16.png",
         "32": "icons/icon32.png",
@@ -27,7 +26,6 @@
         "128": "icons/icon128.png"
     },
 
-    /* 🧩 Toolbar / Popup Icon */
     "action": {
         "default_popup": "popup.html",
         "default_icon": {

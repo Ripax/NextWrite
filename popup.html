@@ -1,24 +1,23 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="styles.css" />
 </head>
 
 <body>
     <div class="popup-container">
-
         <div class="header">
             <div class="brand">
-                <img src="icons/ai.png" width="32" height="32" alt="AI Icon" style="border-radius: 8px;">
+                <img src="icons/ai.png" width="64" height="64" alt="AI Icon" style="border-radius: 8px;">
                 <div class="app-info">
-                    <div class="app-name">AI Rewrite Assistant</div>
-                    <div class="app-subtitle">@HTMLDigger</div>
+                    <div class="app-name">NexText</div>
+                    <div class="app-subtitle">Rewrite & Solve • @HTMLDigger</div>
                 </div>
             </div>
         </div>
-
         <div class="control-bar">
             <button id="settingsBtn" class="icon-btn" title="Settings">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
@@ -32,7 +31,7 @@
 
             <div id="apiStatusText" class="status-text">
                 <span class="status-dot"></span>
-                <span class="status-label">Ready</span>
+                <span class="status-label">Initializing...</span>
             </div>
 
             <label class="switch">
@@ -68,6 +67,7 @@
                 <select id="modelSwitcher">
                     <option value="gpt-4o-mini">GPT-4o Mini</option>
                     <option value="gpt-4o">GPT-4o</option>
+                    <option value="gpt-4">GPT-4</option>
                 </select>
             </div>
 
@@ -83,13 +83,25 @@
             <button id="closeSettings" class="secondary">Close Settings</button>
         </div>
 
+        <div class="mode-switch-container">
+            <label class="mode-switch">
+                <input type="checkbox" id="appModeToggle">
+
+                <span class="mode-label">✍️ Rewrite</span>
+                <span class="mode-label">💡 Solve</span>
+
+                <div class="glider"></div>
+            </label>
+        </div>
+
         <textarea id="inputText" placeholder="Paste text here to rewrite..."></textarea>
 
-        <button id="rewriteBtn">Rewrite Text</button>
+        <button id="actionBtn">Rewrite Text</button>
 
-        <div id="spinner" class="spinner hidden"></div>
-
-        <textarea id="outputText" readonly placeholder="Result will appear here..."></textarea>
+        <div class="output-container">
+            <div id="spinner" class="spinner hidden"></div>
+            <textarea id="outputText" readonly placeholder="Result will appear here..."></textarea>
+        </div>
 
         <button id="copyBtn" class="secondary hidden">Copy Result</button>
 
