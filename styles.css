@@ -3,29 +3,20 @@
 ========================================================= */
 
 :root {
-    /* Core Colors */
     --bg: #0f1115;
     --card: #16191f;
     --text: #e6e6e6;
     --muted: #9aa4b2;
     --border: #2a2f3a;
-
-    /* Interactive Colors */
     --input-bg: #1c1f26;
     --primary: #5eb94c;
     --primary-hover: #4da03e;
     --danger: #ef4444;
     --warning: #eab308;
-
-    /* Spacing & Radius */
     --radius-sm: 8px;
     --radius-md: 12px;
-
-    /* Shadows */
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
-
-    /* Animation */
     --ease: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -55,8 +46,7 @@ body {
     padding: 0;
     width: 330px;
     min-height: 480px;
-    overflow: hidden;
-    /* Prevent body scroll */
+    overflow-x: hidden;
 }
 
 body {
@@ -64,14 +54,13 @@ body {
     color: var(--text);
     display: flex;
     flex-direction: column;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     font-size: 13px;
     line-height: 1.5;
-    -webkit-font-smoothing: antialiased;
 }
 
 /* =========================================================
-    3. LAYOUT & CONTAINERS
+    3. LAYOUT & COMPONENTS
 ========================================================= */
 
 .popup-container {
@@ -82,7 +71,6 @@ body {
     box-shadow: var(--shadow-lg);
     border: 1px solid var(--border);
     overflow: hidden;
-    transition: background 0.3s var(--ease), border-color 0.3s var(--ease);
 }
 
 .header {
@@ -103,7 +91,6 @@ body {
 .app-name {
     font-size: 15px;
     font-weight: 700;
-    letter-spacing: -0.01em;
 }
 
 .app-subtitle {
@@ -111,31 +98,28 @@ body {
     color: var(--muted);
 }
 
-/* =========================================================
-    4. CONTROL BAR (Status + Settings + Theme)
-========================================================= */
-
+/* --- CONTROL BAR FIXES --- */
 .control-bar {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
+    gap: 8px;
     margin-bottom: 12px;
     padding: 8px 12px;
     background: var(--input-bg);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
-    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03);
+    height: 48px;
+    /* Fixed height for stability */
 }
 
-/* Settings Button */
 .icon-btn {
-    width: 32px;
-    height: 32px;
-    padding: 0;
-    margin: 0;
+    width: 32px !important;
+    height: 32px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    /* Critical fix: prevents inheriting margin-top */
     flex-shrink: 0;
-    /* Prevent shrinking */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -143,74 +127,51 @@ body {
     color: var(--muted);
     border: 1px solid transparent;
     border-radius: var(--radius-sm);
-    box-shadow: none;
+    cursor: pointer;
 }
 
 .icon-btn:hover {
     background: rgba(155, 155, 155, 0.1);
     color: var(--text);
-    border-color: var(--border);
 }
 
-.icon-btn:active {
-    transform: scale(0.95);
+.icon-btn svg {
+    width: 20px;
+    height: 20px;
+    stroke-width: 2;
 }
 
-/* Status Text Area */
 .status-text {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
-    /* Increased slightly to give the dot breathing room */
-    font-size: 12px;
-    font-weight: 500;
+    gap: 8px;
+    font-size: 11px;
     color: var(--muted);
-
-    /* REMOVED: overflow: hidden; (This was cutting off the glow) */
-    /* REMOVED: white-space: nowrap; */
+    flex-grow: 1;
 }
 
-/* The Label Span (Apply truncation here instead if text gets too long) */
-.status-label {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 120px;
-    /* Limits width so it doesn't push buttons off screen */
-}
-
-/* Status Dot & Animation */
 .status-dot {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    flex-shrink: 0;
-    /* Ensures dot never gets squished */
-    background-color: var(--primary);
-
-    /* Margin ensures the shadow doesn't hit the neighbor element */
-    margin-left: 4px;
-
+    background: var(--primary);
     box-shadow: 0 0 0 2px rgba(94, 185, 76, 0.2);
     animation: pulse-green 2s infinite;
 }
 
-/* Status States */
 .status-text.error .status-dot {
-    background-color: var(--danger);
-    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+    background: var(--danger);
     animation: none;
 }
 
 .status-text.loading .status-dot {
-    background-color: var(--warning);
-    box-shadow: 0 0 0 2px rgba(234, 179, 8, 0.2);
+    background: var(--warning);
     animation: pulse-yellow 2s infinite;
 }
 
 /* =========================================================
-    5. THEME TOGGLE SWITCH
+    4. FORMS & SWITCHES
 ========================================================= */
 
 .switch {
@@ -219,7 +180,6 @@ body {
     height: 24px;
     display: inline-block;
     flex-shrink: 0;
-    /* Prevent shrinking */
 }
 
 .switch input {
@@ -233,17 +193,24 @@ body {
     inset: 0;
     cursor: pointer;
     background-color: #dbdcdd;
+    /* Light background for track */
     border-radius: 34px;
     border: 1px solid var(--border);
-    transition: background-color 0.3s var(--ease);
+    transition: 0.3s;
 
-    /* Sun & Moon Icons */
+    /* --- Icons (Sun & Moon) --- */
     background-image:
-        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23fbbf24'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z' /%3E%3C/svg%3E"),
-        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239aa4b2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z' /%3E%3C/svg%3E");
-    background-position: 4px center, 24px center;
-    background-repeat: no-repeat;
-    background-size: 14px 14px;
+        /* Sun Icon (Orange - Visible when Dark/Checked) */
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f59e0b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='5'/%3E%3Cpath d='M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42'/%3E%3C/svg%3E"),
+
+        /* Moon Icon (Dark Gray - Visible when Light/Unchecked) */
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234b5563' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z'/%3E%3C/svg%3E");
+
+    background-repeat: no-repeat, no-repeat;
+    background-size: 13px 13px;
+
+    /* Position: Sun at left (6px), Moon at right (calc 100% - 6px) */
+    background-position: 6px center, calc(100% - 6px) center;
 }
 
 .slider::before {
@@ -253,33 +220,27 @@ body {
     width: 18px;
     left: 2px;
     bottom: 2px;
-    background-color: white;
+    background-color: #ffffff;
+    /* White knob matches most UI styles better */
     border-radius: 50%;
-    transition: transform 0.3s var(--ease);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    transition: 0.3s;
     z-index: 2;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
+/* When Checked (Dark Mode) */
 input:checked+.slider {
-    background-color: #191a1dde;;
+    background-color: #191a1d;
+    border-color: #2a2f3a;
 }
 
 input:checked+.slider::before {
     transform: translateX(20px);
-    background-color: #fff;
+    background-color: var(--primary);
 }
 
-input:focus-visible+.slider {
-    outline: 2px solid var(--primary);
-    outline-offset: 2px;
-}
-
-/* =========================================================
-    6. FORMS & INPUTS
-========================================================= */
-
-input[type="text"],
-input[type="password"],
+/* Input Fields */
+input,
 textarea,
 select {
     width: 100%;
@@ -291,115 +252,22 @@ select {
     border-radius: var(--radius-sm);
     font-size: 13px;
     outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-    appearance: none;
-    /* Normalize native select styling */
+    transition: border-color 0.2s;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    border-color: var(--primary);
 }
 
 textarea {
     resize: none;
     min-height: 110px;
-    line-height: 1.6;
-}
-
-/* Focus States */
-input:focus,
-textarea:focus,
-select:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(94, 185, 76, 0.15);
-}
-
-/* Provider Toggle (Radio Group) */
-.provider-toggle {
-    display: flex;
-    gap: 8px;
-    margin: 12px 0;
-    padding: 4px;
-    background: var(--input-bg);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-}
-
-.provider-option {
-    flex: 1;
-    position: relative;
-    cursor: pointer;
-}
-
-.provider-option input {
-    display: none;
-}
-
-.provider-option span {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    padding: 8px;
-    border-radius: var(--radius-sm);
-    font-size: 12px;
-    color: var(--muted);
-    font-weight: 500;
-    transition: all 0.2s var(--ease);
-}
-
-.provider-option:hover span {
-    background: rgba(255, 255, 255, 0.03);
-    color: var(--text);
-}
-
-.provider-option input:checked+span {
-    background: var(--card);
-    color: var(--primary);
-    font-weight: 600;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), inset 0 0 0 1px var(--border);
 }
 
 /* =========================================================
-   7. BUTTONS
-========================================================= */
-
-button {
-    width: 100%;
-    margin-top: 16px;
-    padding: 10px 16px;
-    background: var(--primary);
-    color: #ffffff;
-    border: none;
-    border-radius: var(--radius-sm);
-    font-weight: 600;
-    font-size: 13px;
-    cursor: pointer;
-    transition: background-color 0.2s, transform 0.1s;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-}
-
-button:hover {
-    background-color: var(--primary-hover);
-}
-
-button:active {
-    transform: scale(0.98);
-}
-
-button:focus-visible {
-    outline: 2px solid var(--primary);
-    outline-offset: 2px;
-}
-
-button.secondary {
-    background: #374151;
-    color: #e5e7eb;
-}
-
-button.secondary:hover {
-    background: #4b5563;
-}
-
-/* =========================================================
-   8. SETTINGS & SCROLLBARS
+    5. SETTINGS & SCROLLBARS
 ========================================================= */
 
 .settings-panel {
@@ -442,51 +310,191 @@ textarea,
 }
 
 /* =========================================================
-   LAZY VELOCITY SPINNER
+    6. SETTINGS PANEL
 ========================================================= */
 
-/* Wrapper to center it over the output */
-.output-container {
-    position: relative;
+.settings-panel {
     margin-top: 12px;
-    min-height: 40px;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
 }
 
-.spinner {
+.hidden {
+    display: none !important;
+}
+
+.settings-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 8px;
+    position: relative;
+    animation: slide-up-fade 0.3s var(--ease) forwards;
+}
+
+.tab-btn {
+    flex: 1;
+    position: relative;
+    /* Needed for the animated background */
+    padding: 8px;
+
+    /* Reset generic button styles */
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+
+    /* Text styling */
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+
+    /* Smooth transition for text color */
+    transition: color 0.3s var(--ease);
+
+    /* Ensure text sits above the background animation */
+    z-index: 1;
+    isolation: isolate;
+}
+
+/* The Animated Background Pill */
+.tab-btn::before {
+    content: '';
     position: absolute;
-    top: 50%;
-    left: 50%;
-    /* Center exactly */
-    transform: translate(-50%, -50%);
-    z-index: 10;
+    inset: 0;
+    /* Stretches to fill the button */
+    background-color: var(--input-bg);
+    border-radius: var(--radius-sm);
+    z-index: -1;
+    /* Puts it behind the text */
 
-    width: 32px;
-    height: 32px;
+    /* Initial State: Hidden and slightly shrunk */
+    opacity: 0;
+    transform: scale(0.9);
 
-    /* The Ring Track (Faint Background) */
-    border: 3px solid rgba(255, 255, 255, 0.05);
-    border-radius: 50%;
+    /* The Animation magic */
+    transition: all 0.3s var(--ease);
 
-    /* The Moving Part (Solid Color) */
-    border-top-color: var(--primary);
-
-    /* VELOCITY ANIMATION: Custom cubic-bezier creates the "whip" effect */
-    animation: lazy-spin 1.2s cubic-bezier(0.6, 0.05, 0.2, 0.9) infinite;
+    /* Optional: Slight border for depth */
+    border: 1px solid var(--border);
 }
 
-/* Light Theme Adjustment */
-body.light .spinner {
-    border-color: rgba(0, 0, 0, 0.05);
-    border-top-color: var(--primary);
+/* Hover Effect */
+.tab-btn:hover {
+    color: var(--text);
 }
+
+.tab-btn:hover::before {
+    opacity: 0.6;
+    transform: scale(0.95);
+    /* Subtle scale on hover */
+}
+
+/* Active State */
+.tab-btn.active {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.tab-btn.active::before {
+    opacity: 1;
+    transform: scale(1);
+    /* Full size */
+    background-color: var(--card);
+    /* Make it pop against the background */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.provider-toggle {
+    display: flex;
+    gap: 8px;
+    margin: 12px 0;
+    padding: 4px;
+    background: var(--input-bg);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+}
+
+.provider-option {
+    flex: 1;
+    cursor: pointer;
+    text-align: center;
+}
+
+.provider-option input {
+    display: none;
+}
+
+.provider-option span {
+    display: block;
+    padding: 8px;
+    border-radius: var(--radius-sm);
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.provider-option input:checked+span {
+    background: var(--card);
+    color: var(--primary);
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* History */
+.history-list {
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.history-item {
+    background: var(--input-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px;
+    margin-bottom: 8px;
+    cursor: pointer;
+}
+
+.history-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--muted);
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.history-prompt {
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 2px;
+}
+
+.history-response {
+    color: var(--muted);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.empty-history {
+    text-align: center;
+    padding: 20px;
+    color: var(--muted);
+}
+
 /* =========================================================
-    SLIDING MODE SWITCH
+    7. MAIN INTERFACE
 ========================================================= */
 
 .mode-switch-container {
     margin-bottom: 12px;
-    display: flex;
-    justify-content: center;
 }
 
 .mode-switch {
@@ -498,76 +506,321 @@ body.light .spinner {
     border: 1px solid var(--border);
     border-radius: 8px;
     cursor: pointer;
-    overflow: hidden;
-    /* Contains the sliding glider */
 }
 
-/* Hide the actual checkbox */
 .mode-switch input {
     display: none;
 }
 
-/* The Labels (Rewrite / Solve) */
 .mode-label {
     flex: 1;
     z-index: 2;
-    /* Sit on top of the glider */
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 12px;
-    font-weight: 500;
     color: var(--muted);
-    transition: color 0.3s ease;
+    transition: color 0.3s;
 }
 
-/* The Glider (The moving background) */
 .glider {
     position: absolute;
     top: 2px;
     left: 2px;
-    bottom: 2px;
     width: calc(50% - 4px);
-    /* Half width minus padding */
+    bottom: 2px;
     background-color: var(--primary);
-    /* Green pill */
     border-radius: 6px;
     z-index: 1;
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 }
 
-/* --- STATE: UNCHECKED (Rewrite Mode) --- */
-/* First label is active white */
 .mode-switch input:not(:checked)~.mode-label:first-of-type {
     color: #fff;
     font-weight: 600;
 }
 
-/* Glider stays on left */
-.mode-switch input:not(:checked)~.glider {
-    transform: translateX(0);
-}
-
-/* --- STATE: CHECKED (Solve Mode) --- */
-/* Second label becomes active white */
 .mode-switch input:checked~.mode-label:last-of-type {
     color: #fff;
     font-weight: 600;
 }
 
-/* Glider moves to right */
 .mode-switch input:checked~.glider {
     transform: translateX(100%) translateX(4px);
-    /* Move 100% + gap correction */
 }
 
+/* General Button Styles (Use :not(.icon-btn) to protect the settings icon) */
+button:not(.icon-btn):not(.tab-btn) {
+    width: 100%;
+    margin-top: 16px;
+    padding: 10px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+button:not(.icon-btn):not(.tab-btn):hover {
+    background-color: var(--primary-hover);
+}
+
+button.secondary {
+    background: #374151;
+    color: #e5e7eb;
+}
+
+button.secondary:hover {
+    background: #4b5563;
+}
 
 /* =========================================================
-   ANIMATION KEYFRAMES
+    8. SPINNERS
 ========================================================= */
 
-@keyframes lazy-spin {
+.output-container {
+    position: relative;
+    margin-top: 12px;
+    min-height: 40px;
+}
+
+/* Base Spinner Positioning */
+.spinner {
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 50;
+    pointer-events: none;
+
+    /* Default Fallback */
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    border-top-color: var(--primary);
+    animation: simple-spin 1s linear infinite;
+}
+
+.spinner.hidden {
+    display: none !important;
+}
+
+/* --- OPTION 1: QUANTUM --- */
+.spinner.quantum {
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: var(--primary);
+    animation: q-pulse 2s ease-in-out infinite;
+}
+
+.spinner.quantum::before,
+.spinner.quantum::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid transparent;
+}
+
+.spinner.quantum::before {
+    top: -6px;
+    left: -6px;
+    right: -6px;
+    bottom: -6px;
+    border-top-color: var(--muted);
+    border-bottom-color: var(--muted);
+    animation: q-spin 1.5s linear infinite;
+    opacity: 0.6;
+}
+
+.spinner.quantum::after {
+    top: -12px;
+    left: -12px;
+    right: -12px;
+    bottom: -12px;
+    border-left-color: var(--primary);
+    border-right-color: var(--primary);
+    animation: q-spin 2.5s linear reverse infinite;
+}
+
+/* --- OPTION 2: WAVE --- */
+.spinner.wave {
+    width: 40px;
+    height: 20px;
+    border: none;
+    background: transparent;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-image: linear-gradient(var(--primary), var(--primary));
+    background-size: 6px 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    animation: w-stretch 1.2s ease-in-out 0.1s infinite;
+}
+
+.spinner.wave::before,
+.spinner.wave::after {
+    content: '';
+    width: 6px;
+    height: 100%;
+    background: var(--muted);
+    border-radius: 4px;
+    animation: w-stretch 1.2s ease-in-out infinite;
+}
+
+.spinner.wave::before {
+    animation-delay: 0s;
+}
+
+.spinner.wave::after {
+    animation-delay: 0.2s;
+}
+
+/* --- OPTION 3: RING --- */
+.spinner.ring {
+    width: 24px;
+    height: 24px;
+    background: transparent;
+    border-radius: 50%;
+    border: 3px solid rgba(154, 164, 178, 0.15);
+    border-top-color: var(--primary);
+    animation: r-spin 0.8s cubic-bezier(0.55, 0.055, 0.675, 0.19) infinite;
+}
+
+.spinner.ring::before,
+.spinner.ring::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 3px solid transparent;
+    border-top-color: var(--primary);
+}
+
+.spinner.ring::before {
+    opacity: 0.5;
+    transform: rotate(120deg);
+}
+
+.spinner.ring::after {
+    opacity: 0.2;
+    transform: rotate(240deg);
+}
+
+/* --- OPTION 4: PARTICLE BURST --- */
+.spinner.burst {
+    width: 14px;
+    height: 14px;
+    border: none;
+    border-radius: 50%;
+    background: var(--primary);
+    box-shadow: 0 0 0 0 var(--primary);
+    animation: b-pulse 1.8s cubic-bezier(0.22, 0.61, 0.36, 1) infinite;
+}
+
+.spinner.burst::before,
+.spinner.burst::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 1.5px solid var(--primary);
+    opacity: 0.7;
+    transform: scale(0.3);
+    animation: b-burst 1.8s cubic-bezier(0.22, 0.61, 0.36, 1) infinite;
+}
+
+.spinner.burst::before {
+    animation-delay: -0.9s;
+    opacity: 0.45;
+    border-width: 1px;
+}
+
+.spinner.burst::after {
+    animation-delay: -0.45s;
+    opacity: 0.65;
+}
+
+/* --- OPTION 5: LIQUID ORB --- */
+.spinner.liquid {
+    width: 28px;
+    height: 28px;
+    background: var(--primary);
+    border-radius: 50%;
+    border: none;
+    animation: l-morph 3.2s ease-in-out infinite alternate, l-sway 8s ease-in-out infinite;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15));
+    clip-path: ellipse(50% 50% at 50% 50%);
+}
+
+@supports not (clip-path: ellipse(50% 50%)) {
+    .spinner.liquid {
+        clip-path: none !important;
+        animation-name: l-fallback-pulse, l-sway;
+    }
+}
+
+/* =========================================================
+    9. KEYFRAMES
+========================================================= */
+
+@keyframes simple-spin {
+    to {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+@keyframes q-pulse {
+
+    0%,
+    100% {
+        transform: translate(-50%, -50%) scale(0.5);
+        opacity: 0.8;
+    }
+
+    50% {
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 1;
+    }
+}
+
+@keyframes q-spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes w-stretch {
+
+    0%,
+    100% {
+        height: 8px;
+        opacity: 0.5;
+        background: var(--muted);
+    }
+
+    50% {
+        height: 20px;
+        opacity: 1;
+        background: var(--primary);
+    }
+}
+
+@keyframes r-spin {
     0% {
         transform: translate(-50%, -50%) rotate(0deg);
     }
@@ -576,10 +829,6 @@ body.light .spinner {
         transform: translate(-50%, -50%) rotate(360deg);
     }
 }
-
-/* =========================================================
-   9. KEYFRAME ANIMATIONS
-========================================================= */
 
 @keyframes pulse-green {
     0% {
@@ -594,7 +843,6 @@ body.light .spinner {
 
     100% {
         transform: scale(0.95);
-        box-shadow: 0 0 0 0 rgba(94, 185, 76, 0);
     }
 }
 
@@ -611,6 +859,101 @@ body.light .spinner {
 
     100% {
         transform: scale(0.95);
-        box-shadow: 0 0 0 0 rgba(234, 179, 8, 0);
+    }
+}
+
+@keyframes b-pulse {
+
+    0%,
+    70%,
+    100% {
+        transform: translate(-50%, -50%) scale(0.95);
+        box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+    }
+
+    35% {
+        transform: translate(-50%, -50%) scale(1.1);
+        box-shadow: 0 0 0 8px rgba(154, 164, 178, 0.12);
+    }
+}
+
+@keyframes b-burst {
+    0% {
+        transform: scale(0.2);
+        opacity: 0.8;
+    }
+
+    70% {
+        transform: scale(1.3);
+        opacity: 0.25;
+    }
+
+    100% {
+        transform: scale(1.6);
+        opacity: 0;
+    }
+}
+
+@keyframes l-morph {
+
+    0%,
+    100% {
+        clip-path: ellipse(48% 52% at 50% 48%);
+    }
+
+    25% {
+        clip-path: ellipse(52% 48% at 48% 52%);
+    }
+
+    50% {
+        clip-path: ellipse(49% 51% at 52% 49%);
+    }
+
+    75% {
+        clip-path: ellipse(51% 49% at 49% 51%);
+    }
+}
+
+@keyframes l-sway {
+
+    0%,
+    100% {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+
+    25% {
+        transform: translate(-50%, -50%) rotate(1.5deg);
+    }
+
+    50% {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+
+    75% {
+        transform: translate(-50%, -50%) rotate(-1.5deg);
+    }
+}
+
+@keyframes l-fallback-pulse {
+
+    0%,
+    100% {
+        transform: translate(-50%, -50%) scale(0.95);
+    }
+
+    50% {
+        transform: translate(-50%, -50%) scale(1.05);
+    }
+}
+
+@keyframes slide-up-fade {
+    0% {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
     }
 }
